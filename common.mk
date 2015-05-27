@@ -63,6 +63,9 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/fs/system/framework/com.android.location.provider.jar:system/framework/com.android.location.provider.jar \
     $(LOCAL_PATH)/fs/system/etc/permissions/com.android.location.provider.xml:system/etc/permissions/com.android.location.provider.xml
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/virtuous_oc/virtuous_oc.conf:system/etc/virtuous_oc/virtuous_oc.conf
+
 $(call inherit-product, build/target/product/full.mk)
 
 PRODUCT_AAPT_CONFIG := normal hdpi
@@ -82,7 +85,8 @@ PRODUCT_PACKAGES += \
     audio.r_submix.default \
     camera.u2 \
     hwcomposer.u2 \
-    power.u2
+    power.u2 \
+    virtuous_oc
 
 # OMAP4 OMX
 PRODUCT_PACKAGES += \
