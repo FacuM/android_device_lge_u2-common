@@ -403,6 +403,10 @@ on property:dev.bootcomplete=1
     write /sys/devices/system/cpu/cpu0/cpufreq/screen_off_max_freq 800000
     write /sys/class/misc/customvoltage/mpu_voltages "1395 1385 1375 1310 1185 1025 1010"
     exec /system/bin/virtuous_oc
+    write /sys/module/cpu_boost/parameters/boost_ms 20
+    write /sys/module/cpu_boost/parameters/sync_threshold 600000
+    write /sys/module/cpu_boost/parameters/input_boost_freq 800000
+    write /sys/module/cpu_boost/parameters/input_boost_ms 40
 
 service charger /charger
     class charger

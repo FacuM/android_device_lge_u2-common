@@ -28,6 +28,7 @@
 #define CPUFREQ_CPU0 "/sys/devices/system/cpu/cpu0/cpufreq/"
 #define CPUFREQ_ONDEMAND "/sys/devices/system/cpu/cpufreq/ondemand/"
 #define CPUFREQ_INTERACTIVE "/sys/devices/system/cpu/cpufreq/interactive/"
+#define NOTIFY_ON_MIGRATE "/dev/cpuctl/cpu.notify_on_migrate"
 
 struct omap_power_module {
     struct power_module base;
@@ -108,6 +109,7 @@ static int get_scaling_governor() {
 static void omap_power_set_interactive(struct power_module *module, int on)
 {
     get_scaling_governor();
+    sysfs_write(NOTIFY_ON_MIGRATE, on ? "1" : "0");
     if (strncmp(governor, "interactive", 11) == 0)
         sysfs_write(CPUFREQ_INTERACTIVE "timer_rate", on ? "20000" : "150000");
     if (strncmp(governor, "ondemand", 8) == 0)
