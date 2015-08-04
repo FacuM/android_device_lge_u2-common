@@ -407,6 +407,7 @@ on property:dev.bootcomplete=1
     write /sys/module/cpu_boost/parameters/sync_threshold 600000
     write /sys/module/cpu_boost/parameters/input_boost_freq 800000
     write /sys/module/cpu_boost/parameters/input_boost_ms 40
+    write /sys/module/lowmemorykiller/parameters/minfree 2560,5120,25600,30720,24320,49920
 
 service charger /charger
     class charger
