@@ -57,7 +57,11 @@ PRODUCT_COPY_FILES += \
 
 ## GPS
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml
+    $(LOCAL_PATH)/configs/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml \
+    $(LOCAL_PATH)/configs/SuplRootCert:system/etc/SuplRootCert \
+    $(LOCAL_PATH)/configs/lge.cer:system/etc/cert/lge.cer \
+    $(LOCAL_PATH)/fs/system/framework/com.android.location.provider.jar:system/framework/com.android.location.provider.jar \
+    $(LOCAL_PATH)/fs/system/etc/permissions/com.android.location.provider.xml:system/etc/permissions/com.android.location.provider.xml
 
 $(call inherit-product, build/target/product/full.mk)
 
