@@ -252,6 +252,8 @@ struct omapfb_platform_data {
 	struct omap_lcd_config		lcd;
 	struct omapfb_mem_desc		mem_desc;
 	void				*ctrl_platform_data;
+	__u32				xres_virtual;
+	__u32				yres_virtual;
 };
 
 /* in arch/arm/plat-omap/fb.c */
@@ -272,3 +274,4 @@ void omapfb_dss2fb_timings(struct omap_video_timings *dss_timings,
 #endif
 
 #endif /* __OMAPFB_H */
+

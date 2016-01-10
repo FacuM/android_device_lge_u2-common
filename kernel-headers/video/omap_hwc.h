@@ -97,3 +97,4 @@ struct omap_hwc_data {
 };
 
 #endif
+
