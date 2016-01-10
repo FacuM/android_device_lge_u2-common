@@ -34,11 +34,6 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
-
-###
-### OMAP HDMI AUDIO HAL
-###
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := audio.hdmi.$(TARGET_BOOTLOADER_BOARD_NAME)
@@ -55,4 +50,3 @@ LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libdl
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
-
