@@ -1,6 +1,6 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
-$(call inherit-product, device/common/gps/gps_eu.mk)$(call inherit-product, hardware/ti/omap4/omap4.mk)
+$(call inherit-product, device/common/gps/gps_eu.mk)
 
 $(call inherit-product, hardware/ti/omap4/omap4.mk)
 

@@ -16,23 +16,26 @@
 
 package org.cyanogenmod.hardware;
 
+import java.io.File;
 import org.cyanogenmod.hardware.util.FileUtils;
 
 public class DisplayColorCalibration {
+    private static final String COLOR_FILE = "/sys/devices/omapdss/display0/gamma_saved";
     private static final String GAMMA_TUNING_FILE = "/sys/devices/omapdss/display0/gamma_tuning";
 
     public static boolean isSupported() {
-        return true;
+        File f = new File(COLOR_FILE);
+        return f.exists();
     }
 
     public static int getMaxValue()  {
         return 255;
     }
+    public static int getDefValue()  {
+        return getMaxValue();
+    }
     public static int getMinValue()  {
         return 0;
-    }
-    public static int getDefValue() {
-        return 255;
     }
     public static String getCurColors()  {
         return FileUtils.readOneLine(GAMMA_TUNING_FILE).replaceAll(","," ");
