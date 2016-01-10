@@ -382,4 +382,3 @@ typedef struct camera_device {
 __END_DECLS
 
 #endif /* #ifdef ANDROID_INCLUDE_CAMERA_H */
-
