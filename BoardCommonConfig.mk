@@ -93,11 +93,20 @@ BOARD_HAL_STATIC_LIBRARIES := libhealthd.omap4
 BOARD_SEPOLICY_DIRS := \
     device/lge/u2-common/selinux
 
-BOARD_SEPOLICY_UNION := \
-    file_contexts \
-    pvrsrvinit.te \
-    device.te \
-    domain.te
+BOARD_SEPOLICY_UNION += \
+	file_contexts \
+        fRom.te \
+        init.te \
+        mediaserver.te \
+        pvrsrvinit.te \
+        rild.te \
+	bluetooth.te \
+	sdcardd.te \
+	servicemanager.te \
+	system_server.te \
+	zygote.te \
+	device.te \
+        domain.te
 
 # CMHW
 BOARD_HARDWARE_CLASS := device/lge/u2-common/cmhw/

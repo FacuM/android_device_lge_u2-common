@@ -1,5 +1,6 @@
 # GFX
 /dev/dsscomp                    u:object_r:video_device:s0
+/system/bin/pvrsrvinit          u:object_r:pvrsrvinit_exec:s0
 /system/vendor/bin/pvrsrvinit   u:object_r:pvrsrvinit_exec:s0
 /system/vendor/bin/pvrsrvinit_SGX540_120  u:object_r:pvrsrvinit_exec:s0
 
@@ -23,4 +24,4 @@
 # Hardware tunables
 /sys/devices/omapdss/display0/gamma_tuning        u:object_r:sysfs_writable:s0
 /sys/devices/platform/tspdrv/nforce_timed         u:object_r:sysfs_writable:s0
-
+/sys/devices/omapdss/display0/nature         	  u:object_r:sysfs_writable:s0
