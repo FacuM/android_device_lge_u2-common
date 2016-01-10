@@ -1,6 +1,8 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
-$(call inherit-product, device/common/gps/gps_eu.mk)
+$(call inherit-product, device/common/gps/gps_eu.mk)$(call inherit-product, hardware/ti/omap4/omap4.mk)
+
+$(call inherit-product, hardware/ti/omap4/omap4.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/lge/u2-common/overlay
 
@@ -83,32 +85,15 @@ PRODUCT_PACKAGES += \
     audio.hdmi.u2 \
     audio.usb.default \
     audio.r_submix.default \
-    camera.u2 \
-    hwcomposer.u2 \
+    camera.omap4 \
     power.u2 \
     virtuous_oc
 
 # OMAP4 OMX
 PRODUCT_PACKAGES += \
-    libdomx \
-    libOMX_Core \
-    libOMX.TI.DUCATI1.VIDEO.H264E \
-    libOMX.TI.DUCATI1.VIDEO.MPEG4E \
-    libOMX.TI.DUCATI1.VIDEO.DECODER \
-    libOMX.TI.DUCATI1.VIDEO.DECODER.secure \
-    libOMX.TI.DUCATI1.VIDEO.CAMERA \
-    libOMX.TI.DUCATI1.MISC.SAMPLE \
-    libstagefrighthw \
-    libI420colorconvert \
-    libtiutils_custom \
-    libion_ti \
-    smc_pa_ctrl \
-    tf_daemon \
-    libtf_crypto_sst \
     libmm_osal \
     gralloc.omap4.so
 
-#
 PRODUCT_PACKAGES += \
     libtiutils \
     libipcutils \

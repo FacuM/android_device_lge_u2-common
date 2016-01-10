@@ -6,16 +6,11 @@ TARGET_SPECIFIC_HEADER_PATH := $(COMMON_FOLDER)/include
 # inherit from the proprietary version
 -include vendor/lge/u2-common/BoardConfigVendor.mk
 
+-include hardware/ti/omap4/BoardConfigCommon.mk
+
 TARGET_NO_BOOTLOADER := true
-TARGET_BOARD_PLATFORM := omap4
 TARGET_BOARD_OMAP_CPU := 4430
-TARGET_CPU_ABI := armeabi-v7a
-TARGET_CPU_ABI2 := armeabi
 TARGET_BOOTLOADER_BOARD_NAME := u2
-TARGET_CPU_SMP := true
-TARGET_CPU_VARIANT := cortex-a9
-TARGET_ARCH := arm
-TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_ARCH_VARIANT_CPU := $(TARGET_CPU_VARIANT)
 TARGET_ARCH_VARIANT_FPU := neon
 ARCH_ARM_HAVE_TLS_REGISTER := true
@@ -59,27 +54,6 @@ BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
 BOARD_BLUEDROID_VENDOR_CONF := device/lge/u2-common/configs/vnd_u2.txt
 
-# Setup custom omap4xxx defines
-BOARD_USE_CUSTOM_LIBION := true
-
-# OMX
-HARDWARE_OMX := true
-OMAP_ENHANCEMENT := true
-BOARD_USE_TI_ENHANCED_DOMX := true
-ifdef OMAP_ENHANCEMENT
-COMMON_GLOBAL_CFLAGS += -DOMAP_ENHANCEMENT -DTARGET_OMAP4 -DFORCE_SCREENSHOT_CPU_PATH
-endif
-
-# Makefile variable and C/C++ macro to recognise DOMX version
-ifdef BOARD_USE_TI_ENHANCED_DOMX
-    BOARD_USE_TI_DUCATI_H264_PROFILE := true
-    TI_CUSTOM_DOMX_PATH := $(COMMON_FOLDER)/domx
-    DOMX_PATH := $(COMMON_FOLDER)/domx
-    ENHANCED_DOMX := true
-else
-    DOMX_PATH := hardware/ti/omap4xxx/domx
-endif
-
 # HWComposer
 BOARD_USE_SYSFS_VSYNC_NOTIFICATION := true
 
@@ -97,9 +71,9 @@ USE_CAMERA_STUB := false
 
 # External SGX Module
 SGX_MODULES:
-	make clean -C $(COMMON_FOLDER)/sgx-module/eurasiacon/build/linux2/omap4430_android
+	make clean -C hardware/ti/omap4/pvr-source/eurasiacon/build/linux2/omap4430_android
 	cp $(TARGET_KERNEL_SOURCE)/drivers/video/omap2/omapfb/omapfb.h $(KERNEL_OUT)/drivers/video/omap2/omapfb/omapfb.h
-	make -j8 -C $(COMMON_FOLDER)/sgx-module/eurasiacon/build/linux2/omap4430_android ARCH=arm KERNEL_CROSS_COMPILE=arm-eabi- CROSS_COMPILE=arm-eabi- KERNELDIR=$(KERNEL_OUT) TARGET_PRODUCT="blaze_tablet" BUILD=release TARGET_SGX=540 PLATFORM_VERSION=4.0
+	make -j8 -C hardware/ti/omap4/pvr-source/eurasiacon/build/linux2/omap4430_android ARCH=arm KERNEL_CROSS_COMPILE=arm-eabi- CROSS_COMPILE=arm-eabi- KERNELDIR=$(KERNEL_OUT) TARGET_PRODUCT="blaze_tablet" BUILD=release TARGET_SGX=540 PLATFORM_VERSION=4.0
 	mv $(KERNEL_OUT)/../../target/kbuild/pvrsrvkm_sgx540_120.ko $(KERNEL_MODULES_OUT)
 	$(ARM_EABI_TOOLCHAIN)/arm-eabi-strip --strip-unneeded $(KERNEL_MODULES_OUT)/pvrsrvkm_sgx540_120.ko
 
