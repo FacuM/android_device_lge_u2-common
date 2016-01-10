@@ -59,6 +59,7 @@ PRODUCT_COPY_FILES += \
 
 ## GPS
 PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/fs/system/bin/fstrim:system/bin/fstrim \
     $(LOCAL_PATH)/configs/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml \
     $(LOCAL_PATH)/configs/SuplRootCert:system/etc/SuplRootCert \
     $(LOCAL_PATH)/configs/lge.cer:system/etc/cert/lge.cer \
