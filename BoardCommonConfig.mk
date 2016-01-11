@@ -35,6 +35,13 @@ TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_USES_OPENGLES_FOR_SCREEN_CAPTURE := true
 USE_OPENGL_RENDERER := true
 
+# Brightness
+ifeq ($(PRODUCT_DEVICE),p769)
+	BACKLIGHT_PATH := "/sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0038/brightness"
+else
+	BACKLIGHT_PATH := "/sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0036/brightness"
+endif
+
 # Wifi related defines
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 WPA_SUPPLICANT_VERSION := VER_0_8_X
