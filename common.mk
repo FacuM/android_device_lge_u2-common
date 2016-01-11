@@ -96,7 +96,6 @@ PRODUCT_PACKAGES += \
     gralloc.omap4.so
 
 PRODUCT_PACKAGES += \
-    libtiutils \
     libipcutils \
     libipc \
     libnotify \
