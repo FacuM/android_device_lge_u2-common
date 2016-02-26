@@ -604,7 +604,7 @@ static int hdmi_adev_dump(const audio_hw_device_t *dev, int fd)
 static audio_hw_device_t hdmi_adev_descriptor = {
     .common = {
         .tag = HARDWARE_DEVICE_TAG,
-        .version = AUDIO_DEVICE_API_VERSION_2_0,
+        .version = AUDIO_DEVICE_API_VERSION_CURRENT,
         .module = NULL,
         .close = hdmi_adev_close,
     },

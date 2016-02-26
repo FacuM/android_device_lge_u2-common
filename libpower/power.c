@@ -19,56 +19,53 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define LOG_TAG "OMAP PowerHAL"
+#define LOG_TAG "TI OMAP PowerHAL"
 #include <utils/Log.h>
 
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-#define CPUFREQ_CPU0 "/sys/devices/system/cpu/cpu0/cpufreq/"
-#define CPUFREQ_ONDEMAND "/sys/devices/system/cpu/cpufreq/ondemand/"
 #define CPUFREQ_INTERACTIVE "/sys/devices/system/cpu/cpufreq/interactive/"
+#define CPUFREQ_CPU0 "/sys/devices/system/cpu/cpu0/cpufreq/"
+#define BOOSTPULSE_PATH (CPUFREQ_INTERACTIVE "boostpulse")
 #define NOTIFY_ON_MIGRATE "/dev/cpuctl/cpu.notify_on_migrate"
+
+#define MAX_FREQ_NUMBER 12
+#define NOM_FREQ_INDEX 3
+
+static int freq_num;
+static char *freq_list[MAX_FREQ_NUMBER];
+static char *max_freq, *nom_freq;
 
 struct omap_power_module {
     struct power_module base;
     pthread_mutex_t lock;
     int boostpulse_fd;
     int boostpulse_warned;
+    int inited;
 };
 
-static char governor[20];
+static int str_to_tokens(char *str, char **token, int max_token_idx) {
+    char *pos, *start_pos = str;
+    char *token_pos;
+    int token_idx = 0;
 
-static int sysfs_read(char *path, char *s, int num_bytes)
-{
-    char buf[80];
-    int count;
-    int ret = 0;
-    int fd = open(path, O_RDONLY);
-
-    if (fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error opening %s: %s\n", path, buf);
-
-        return -1;
+    if (!str || !token || !max_token_idx) {
+        return 0;
     }
 
-    if ((count = read(fd, s, num_bytes - 1)) < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error writing to %s: %s\n", path, buf);
+    do {
+        token_pos = strtok_r(start_pos, " \t\r\n", &pos);
 
-        ret = -1;
-    } else {
-        s[count] = '\0';
-    }
+        if (token_pos)
+            token[token_idx++] = strdup(token_pos);
+        start_pos = NULL;
+    } while (token_pos && token_idx < max_token_idx);
 
-    close(fd);
-
-    return ret;
+    return token_idx;
 }
 
-static void sysfs_write(char *path, char *s)
-{
+static void sysfs_write(char *path, char *s) {
     char buf[80];
     int len;
     int fd = open(path, O_WRONLY);
@@ -88,105 +85,139 @@ static void sysfs_write(char *path, char *s)
     close(fd);
 }
 
-static int get_scaling_governor() {
-    if (sysfs_read(CPUFREQ_CPU0 "scaling_governor", governor,
-                sizeof(governor)) == -1) {
-        // Can't obtain the scaling governor. Return.
+static int sysfs_read(char *path, char *s, int s_size) {
+    char buf[80];
+    int len, i;
+    int fd;
+
+    if (!path || !s || !s_size) {
         return -1;
+    }
+
+    fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error opening %s: %s\n", path, buf);
+        return fd;
+    }
+
+    len = read(fd, s, s_size-1);
+    if (len < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error reading from %s: %s\n", path, buf);
     } else {
-        // Strip newline at the end.
-        int len = strlen(governor);
-
-        len--;
-
-        while (len >= 0 && (governor[len] == '\n' || governor[len] == '\r'))
-            governor[len--] = '\0';
+        s[len] = '\0';
     }
 
-    return 0;
+    close(fd);
+    return len;
 }
 
-static void omap_power_set_interactive(struct power_module *module, int on)
-{
-    get_scaling_governor();
-    sysfs_write(NOTIFY_ON_MIGRATE, on ? "1" : "0");
-    if (strncmp(governor, "interactive", 11) == 0)
-        sysfs_write(CPUFREQ_INTERACTIVE "timer_rate", on ? "30000" : "150000");
-    if (strncmp(governor, "ondemand", 8) == 0)
-        sysfs_write(CPUFREQ_ONDEMAND "sampling_rate", on ? "60000" : "150000");
-}
+static void omap_power_init(struct power_module *module) {
+    struct omap_power_module *omap_device = (struct omap_power_module *) module;
+    int tmp;
+    char freq_buf[MAX_FREQ_NUMBER*10];
 
-static void configure_governor()
-{
-    omap_power_set_interactive(NULL, 1);
-    if (strncmp(governor, "interactive", 11) == 0) {
-        sysfs_write(CPUFREQ_INTERACTIVE "min_sample_time", "60000");
-        sysfs_write(CPUFREQ_INTERACTIVE "above_hispeed_delay", "30000");
-        sysfs_write(CPUFREQ_INTERACTIVE "hispeed_freq", "600000");
-    } else if (strncmp(governor, "ondemand", 8) == 0) {
-        sysfs_write(CPUFREQ_ONDEMAND "io_is_busy", "1");
-        sysfs_write(CPUFREQ_ONDEMAND "boostfreq", "600000");
+    tmp = sysfs_read(CPUFREQ_CPU0 "scaling_available_frequencies", freq_buf, sizeof(freq_buf));
+    if (tmp <= 0) {
+        return;
     }
+
+    freq_num = str_to_tokens(freq_buf, freq_list, MAX_FREQ_NUMBER);
+    if (!freq_num) {
+        return;
+    }
+
+    max_freq = freq_list[freq_num - 1];
+
+    if (freq_num >= 6) {
+        tmp = freq_num - (freq_num/3);
+        ALOGI("Total available frequencies = %x. Setting highspeed_freq to %s.\n", freq_num, freq_list[tmp - 1]);
+    }
+    else {
+        tmp = (NOM_FREQ_INDEX > freq_num) ? freq_num : NOM_FREQ_INDEX;
+    }
+
+    nom_freq = freq_list[tmp - 1];
+
+    sysfs_write(CPUFREQ_INTERACTIVE "timer_rate", "30000");
+    sysfs_write(CPUFREQ_INTERACTIVE "min_sample_time","60000");
+    sysfs_write(CPUFREQ_INTERACTIVE "hispeed_freq", nom_freq);
+    sysfs_write(CPUFREQ_INTERACTIVE "go_hispeed_load", "99");
+    sysfs_write(CPUFREQ_INTERACTIVE "above_hispeed_delay", "30000");
+
+    ALOGI("Initialized successfully");
+    omap_device->inited = 1;
 }
 
-static int boostpulse_open(struct omap_power_module *omap)
-{
+static int boostpulse_open(struct omap_power_module *omap_device) {
     char buf[80];
 
-    pthread_mutex_lock(&omap->lock);
+    pthread_mutex_lock(&omap_device->lock);
 
-    if (omap->boostpulse_fd < 0) {
-        if (get_scaling_governor() < 0) {
-            ALOGE("Can't read scaling governor.");
-            omap->boostpulse_warned = 1;
-        } else {
-            if (strncmp(governor, "ondemand", 8) == 0)
-                omap->boostpulse_fd = open(CPUFREQ_ONDEMAND "boostpulse", O_WRONLY);
-            else if (strncmp(governor, "interactive", 11) == 0)
-                omap->boostpulse_fd = open(CPUFREQ_INTERACTIVE "boostpulse", O_WRONLY);
+    if (omap_device->boostpulse_fd < 0) {
+        omap_device->boostpulse_fd = open(BOOSTPULSE_PATH, O_WRONLY);
 
-            if (omap->boostpulse_fd < 0 && !omap->boostpulse_warned) {
+        if (omap_device->boostpulse_fd < 0) {
+            if (!omap_device->boostpulse_warned) {
                 strerror_r(errno, buf, sizeof(buf));
-                ALOGE("Error opening %s boostpulse interface: %s\n", governor, buf);
-                omap->boostpulse_warned = 1;
-            } else if (omap->boostpulse_fd > 0) {
-                configure_governor();
-                ALOGD("Opened %s boostpulse interface", governor);
+                ALOGE("Error opening %s: %s\n", BOOSTPULSE_PATH, buf);
+                omap_device->boostpulse_warned = 1;
             }
+        } else {
+            omap_device->boostpulse_warned = 0;
         }
     }
 
-    pthread_mutex_unlock(&omap->lock);
-    return omap->boostpulse_fd;
+    pthread_mutex_unlock(&omap_device->lock);
+    return omap_device->boostpulse_fd;
 }
 
-static void omap_power_hint(struct power_module *module, power_hint_t hint,
-                            void *data)
-{
-    struct omap_power_module *omap = (struct omap_power_module *) module;
+static void omap_power_set_interactive(struct power_module *module, int on) {
+    struct omap_power_module *omap_device = (struct omap_power_module *) module;
+
+    if (!omap_device->inited)
+        return;
+
+    /*
+     * Lower maximum frequency when screen is off.  CPU 0 and 1 share a
+     * cpufreq policy.
+     */
+
+    sysfs_write(CPUFREQ_CPU0 "scaling_max_freq", on ? max_freq : nom_freq);
+    sysfs_write(NOTIFY_ON_MIGRATE, on ? "1" : "0");
+}
+
+static void omap_power_hint(struct power_module *module, power_hint_t hint, void *data) {
+    struct omap_power_module *omap_device = (struct omap_power_module *) module;
     char buf[80];
     int len;
     int duration = 1;
 
+    if (!omap_device->inited)
+        return;
+
     switch (hint) {
     case POWER_HINT_INTERACTION:
+#ifdef POWER_HINT_CPU_BOOST
     case POWER_HINT_CPU_BOOST:
-        if (boostpulse_open(omap) >= 0) {
+#endif
+        if (boostpulse_open(omap_device) >= 0) {
             if (data != NULL)
-                duration = (int) data;
+                duration = *((int*)data);
 
+            memset(buf, 0, sizeof(buf));
             snprintf(buf, sizeof(buf), "%d", duration);
-            len = write(omap->boostpulse_fd, buf, strlen(buf));
+            len = write(omap_device->boostpulse_fd, buf, strlen(buf));
 
             if (len < 0) {
                 strerror_r(errno, buf, sizeof(buf));
-                ALOGE("Error writing to boostpulse: %s\n", buf);
-
-                pthread_mutex_lock(&omap->lock);
-                close(omap->boostpulse_fd);
-                omap->boostpulse_fd = -1;
-                omap->boostpulse_warned = 0;
-                pthread_mutex_unlock(&omap->lock);
+                ALOGE("Error writing to %s: %s\n", BOOSTPULSE_PATH, buf);
+                pthread_mutex_lock(&omap_device->lock);
+                close(omap_device->boostpulse_fd);
+                omap_device->boostpulse_fd = -1;
+                omap_device->boostpulse_warned = 0;
+                pthread_mutex_unlock(&omap_device->lock);
             }
         }
         break;
@@ -199,33 +230,28 @@ static void omap_power_hint(struct power_module *module, power_hint_t hint,
     }
 }
 
-static void omap_power_init(struct power_module *module)
-{
-    get_scaling_governor();
-    configure_governor();
-}
-
 static struct hw_module_methods_t power_module_methods = {
     .open = NULL,
 };
 
 struct omap_power_module HAL_MODULE_INFO_SYM = {
-    base: {
-        common: {
-            tag: HARDWARE_MODULE_TAG,
-            module_api_version: POWER_MODULE_API_VERSION_0_2,
-            hal_api_version: HARDWARE_HAL_API_VERSION,
-            id: POWER_HARDWARE_MODULE_ID,
-            name: "OMAP Power HAL",
-            author: "The CyanogenMod Project",
-            methods: &power_module_methods,
+    .base = {
+        .common = {
+            .tag = HARDWARE_MODULE_TAG,
+            .module_api_version = POWER_MODULE_API_VERSION_0_2,
+            .hal_api_version = HARDWARE_HAL_API_VERSION,
+            .id = POWER_HARDWARE_MODULE_ID,
+            .name = "OMAP Power HAL",
+            .author = "The Android Open Source Project",
+            .methods = &power_module_methods,
         },
-       init: omap_power_init,
-       setInteractive: omap_power_set_interactive,
-       powerHint: omap_power_hint,
+
+       .init = omap_power_init,
+       .setInteractive = omap_power_set_interactive,
+       .powerHint = omap_power_hint,
     },
 
-    lock: PTHREAD_MUTEX_INITIALIZER,
-    boostpulse_fd: -1,
-    boostpulse_warned: 0,
+    .lock = PTHREAD_MUTEX_INITIALIZER,
+    .boostpulse_fd = -1,
+    .boostpulse_warned = 0,
 };

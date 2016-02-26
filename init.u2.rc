@@ -1,33 +1,39 @@
 import init.u2.usb.rc
+import init.omap4.rc
 
 on early-init
 # create mountpoints
-    chmod 0701 /mnt/media_rw
-    mkdir /storage 0050 system sdcard_r
     mkdir /persist 0500 system system
     chown system system /sys/module/lge_handle_panic/parameters/hidden_reset_enable
     chmod 660 /sys/module/lge_handle_panic/parameters/hidden_reset_enable
 
-on init
-    # External storage directories
-    mkdir /mnt/media_rw/sdcard0 0700 media_rw media_rw
-
-    mkdir /storage/sdcard0 0700 root root
-
-    export EXTERNAL_STORAGE /storage/sdcard0
-
     # for backwards compatibility
-    symlink /storage/sdcard0 /sdcard
-    symlink /storage/sdcard0 /mnt/sdcard
-    symlink /storage/sdcard0 /storage/sdcard
+    symlink /sdcard /mnt/sdcard
+    symlink /sdcard /storage/sdcard0
+
+	setprop ro.vold.primary_physical 1
+	setprop vold.debug.default_primary 1
+	setprop ro.vold.primary_physical 1
+	setprop ctl.restart vold
+	setprop vold.has_adoptable 0
 
 on fs
     mount_all ./fstab.u2
-# disable FUSE property value
-    setprop ro.crypto.fuse_sdcard true
+    swapon_all ./fstab.u2
 
-    ## This needs to run ASAP to set up the framebuffer before zygote kicks in
-    start pvrsrvinit
+    # Enable PVR modules
+    insmod /system/lib/modules/pvrsrvkm_sgx540_120.ko
+
+    # read only 1 page at a time
+    write /proc/sys/vm/page-cluster 0
+
+    # set swappines to 100
+    write /proc/sys/vm/swappiness 100
+
+    # increase read-ahead value to 256 kb
+    write /sys/block/mmcblk0/queue/read_ahead_kb 256
+
+export LD_SHIM_LIBS /system/lib/libril.so|liblge.so
 
 on post-fs-data
     mkdir /data/lgdrm 0770 lgdrm lgdrm_acc
@@ -57,21 +63,19 @@ on post-fs-data
 # Create Directory for widevine
     mkdir /persist/widevine 0770 drm system
 
-# FUSE property value
-    # we will remap this as /mnt/sdcard with the sdcard fuse tool
-    mkdir /data/media 0775 media_rw media_rw
-    chown media_rw media_rw /data/media
-
 # audio file access
     mkdir /data/audio 0770 media audio
     chown media audio /data/audio
     chmod 0770 /data/audio
+
 # gps permissions
 # GPS GPIO Setting - refer gps_gpio.c(android\kernel\drivers\p760\misc)
     chown system system /sys/devices/platform/gps_gpio/poweron
     chown system system /sys/devices/platform/gps_gpio/reset
+
 # GPS UART Setting
     chown system system /dev/ttyO2
+
 # GPS RIL port Setting
     chown system system /dev/pts17
 
@@ -189,24 +193,29 @@ on post-fs-data
 
 on boot
     chmod 0666 /dev/pvrsrvkm
+    chmod 0644 /proc/cmdline
+
 # change permissions for Tiler driver
     chmod 0777 /dev/tiler
     chmod 0777 /dev/dmm
+
 # Create Directory for Secure Storage
     mkdir /persist/smc 0770 system system
+
 # debugfs
     mount debugfs /sys/kernel/debug /sys/kernel/debug
+
 # touch
     chown system system /sys/devices/virtual/input/lge_touch/keyguard
+
 # change permissions for ION driver
     chmod 0777 /dev/ion
-
     chown system graphics /sys/class/graphics/fb0/overlays
     chown system graphics /sys/class/graphics/fb0/fit_to_screen
     chown system graphics /sys/class/graphics/fb0/overlays_rotate
-
     chmod 0777 /dev/graphics/fb0
     chmod 0777 /dev/graphics/fb1
+
 # change permissions for LCD backlight LM3530
     chown system radio /sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0038/brightness
     chmod 0664 /sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0038/brightness
@@ -214,9 +223,6 @@ on boot
 # change permissions for LCD backlight LM3533
     chown system radio /sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0036/brightness
     chmod 0664 /sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0036/brightness
-# change permissions for LCD Gamma Tuning
-    chown system radio /sys/devices/omapdss/display0/gamma_tuning
-    chmod 0660 /sys/devices/omapdss/display0/gamma_tuning
 
 # change permissions for LED backlight
     chown system radio /sys/class/leds/button-backlight/br_maintain_on
@@ -272,12 +278,6 @@ on boot
     write /proc/sys/net/ipv6/conf/rment1/disable_ipv6 1
     write /proc/sys/net/ipv6/conf/rmnet2/disable_ipv6 1
 #LGE_CHANGE_E 20120720, hwansuk.kang@lge.com [data] Disable IPv6 for mobile network
-
-service pvrsrvinit /vendor/bin/pvrsrvinit
-    disabled
-    user root
-    group root
-    oneshot
 
 service sensord /system/bin/sensord
     user system
@@ -379,20 +379,14 @@ service glgps /system/bin/glgps -c /system/etc/gps_brcm_conf.xml
     user system
     group net_raw sdcard_rw system radio
 
-# create virtual SD card at /mnt/sdcard, based on the /data/media directory
-# daemon will drop to user/group system/media_rw after initializing
-# underlying files in /data/media will be created with user and group media_rw (1023)
-# FUSE daemon
-#service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
-#    class late_start
-
-service fuse_sdcard0 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/sdcard0 /storage/sdcard0
-    class late_start
-    disabled
-
-## Set the wifi mac address
+# Set the wifi mac address
 on property:dev.bootcomplete=1
     exec /system/bin/wifimac
+    chown system system /system/bin/glgps
+    chmod 777 /system/bin/glgps
+    chmod 755 /mnt/asec
+    chmod 777 /data/gps
+    chmod -R 777 /data/gps
 
 on property:dev.bootcomplete=1
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
@@ -401,7 +395,9 @@ on property:dev.bootcomplete=1
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 200000
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1008000
     write /sys/devices/system/cpu/cpu0/cpufreq/screen_off_max_freq 800000
-    write /sys/class/misc/customvoltage/mpu_voltages "1395 1385 1375 1310 1185 1025 1010"
+    write /sys/class/misc/customvoltage/mpu_voltages "1365 1355 1345 1280 1155 980 940"
+    write /sys/class/misc/customvoltage/core_voltages "1230 1110 940"
+    write /sys/class/misc/customvoltage/iva_voltages "1281 1104 940"
     exec /system/bin/virtuous_oc
     write /sys/module/cpu_boost/parameters/boost_ms 20
     write /sys/module/cpu_boost/parameters/sync_threshold 600000
