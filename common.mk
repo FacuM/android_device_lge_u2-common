@@ -11,6 +11,10 @@ DEVICE_PACKAGE_OVERLAYS += $(COMMON_FOLDER)/overlay
 PRODUCT_COPY_FILES += \
     $(COMMON_FOLDER)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
 
+# RIL symbols
+PRODUCT_PACKAGES += \
+    libril_shim \
+    lge-ril-shim
 
 # Rootdir
 PRODUCT_PACKAGES += \

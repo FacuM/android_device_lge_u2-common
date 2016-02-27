@@ -1,5 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
+# libril
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := libril.cpp
