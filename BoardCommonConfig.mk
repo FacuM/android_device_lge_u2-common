@@ -23,6 +23,9 @@ BOARD_KERNEL_CMDLINE := androidboot.selinux=permissive
 BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_PAGESIZE := 2048
 
+# Bump
+BOARD_CUSTOM_BOOTIMG_MK := $(COMMON_FOLDER)/custombootimg.mk
+
 # Recovery
 BOARD_HAS_NO_SELECT_BUTTON := true
 TARGET_RECOVERY_FSTAB := $(COMMON_FOLDER)/rootdir/fstab.u2
