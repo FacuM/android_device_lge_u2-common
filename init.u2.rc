@@ -33,7 +33,7 @@ on fs
     # increase read-ahead value to 256 kb
     write /sys/block/mmcblk0/queue/read_ahead_kb 256
 
-export LD_SHIM_LIBS /system/lib/libril.so|liblge.so
+export LD_SHIM_LIBS /system/lib/libril.so|libril_shim.so:/system/lib/lge-ril.so|lge-ril-shim.so
 
 on post-fs-data
     mkdir /data/lgdrm 0770 lgdrm lgdrm_acc
