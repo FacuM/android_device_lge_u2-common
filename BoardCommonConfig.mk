@@ -67,7 +67,7 @@ TARGET_TI_HWC_HDMI_DISABLED := true
 CONFIG_NO_ALG := true
 
 # Radio fixes
-BOARD_RIL_CLASS := $(COMMON_FOLDER)/ril/
+BOARD_RIL_CLASS := ../../../device/lge/u2-common/ril/
 
 # Enable Minikin text layout engine (will be the default soon)
 USE_MINIKIN := true
@@ -83,7 +83,7 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_HAS_NO_MISC_PARTITION := true
 
 # Vibration
-BOARD_HAS_VIBRATOR_IMPLEMENTATION := $(COMMON_FOLDER)/vibrator.c
+BOARD_HAS_VIBRATOR_IMPLEMENTATION := ../../device/lge/u2-common/vibrator.c
 
 # Camera
 USE_CAMERA_STUB := false
@@ -110,7 +110,7 @@ TARGET_NEEDS_BIONIC_MD5 := true
 COMMON_GLOBAL_CFLAGS += -DDISABLE_ASHMEM_TRACKING
 
 # Charger
-BOARD_CUSTOM_GRAPHICS := $(COMMON_FOLDER)/recovery-gfx.c
+BOARD_CUSTOM_GRAPHICS := ../../../device/lge/u2-common/recovery-gfx.c
 BOARD_CHARGER_ENABLE_SUSPEND := true
 
 # Override healthd HAL to use charge_counter for 1%
