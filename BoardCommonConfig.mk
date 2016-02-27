@@ -29,6 +29,13 @@ RECOVERY_FSTAB_VERSION := 2
 BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file"
 TARGET_OTA_ASSERT_DEVICE := p760,p765,p768,p769,u2
 
+# Backlight
+ifeq ($(LCD_BACKLIGHT_LM3530),true)
+    BACKLIGHT_PATH := "/sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0038/brightness"
+else
+    BACKLIGHT_PATH := "/sys/devices/platform/omap/omap_i2c.2/i2c-2/2-0036/brightness"
+endif
+
 # EGL
 BOARD_EGL_CFG := device/lge/u2-common/egl.cfg
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
