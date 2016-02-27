@@ -4,7 +4,9 @@ $(call inherit-product, device/common/gps/gps_eu.mk)
 
 $(call inherit-product, hardware/ti/omap4/omap4.mk)
 
-DEVICE_PACKAGE_OVERLAYS += device/lge/u2-common/overlay
+$(call inherit-product, build/target/product/full.mk)
+
+DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
@@ -58,16 +60,11 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.bluetooth.xml:system/etc/permissions/android.hardware.bluetooth.xml \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:system/etc/permissions/android.hardware.bluetooth_le.xml
 
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/virtuous_oc/virtuous_oc.conf:system/etc/virtuous_oc/virtuous_oc.conf
-
 # GPS
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml \
     $(LOCAL_PATH)/configs/SuplRootCert:system/etc/SuplRootCert \
     $(LOCAL_PATH)/configs/lge.cer:system/etc/cert/lge.cer
-
-$(call inherit-product, build/target/product/full.mk)
 
 # high-density artwork where available
 PRODUCT_AAPT_CONFIG := normal hdpi
@@ -83,7 +80,12 @@ PRODUCT_PACKAGES += \
     audio.usb.default \
     audio.r_submix.default \
     power.u2 \
+
+# Screen-off governor
+PRODUCT_PACKAGES += \
     virtuous_oc
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/virtuous_oc/virtuous_oc.conf:system/etc/virtuous_oc/virtuous_oc.conf
 
 # Camera
 PRODUCT_PACKAGES += \
