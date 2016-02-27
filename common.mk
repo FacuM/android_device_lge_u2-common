@@ -1,44 +1,48 @@
+COMMON_FOLDER := device/lge/u2-common
+
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
-
 $(call inherit-product, device/common/gps/gps_eu.mk)
-
 $(call inherit-product, hardware/ti/omap4/omap4.mk)
-
 $(call inherit-product, build/target/product/full.mk)
 
-DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
+DEVICE_PACKAGE_OVERLAYS += $(COMMON_FOLDER)/overlay
 
+# Recovery
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
+    $(COMMON_FOLDER)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
 
-# Scripts and confs
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/init.u2.usb.rc:root/init.u2.usb.rc \
-    $(LOCAL_PATH)/init.u2.rc:root/init.u2.rc \
-    $(LOCAL_PATH)/ueventd.u2.rc:root/ueventd.u2.rc \
-    $(LOCAL_PATH)/fstab.u2:root/fstab.u2 
 
+# Rootdir
+PRODUCT_PACKAGES += \
+    default.prop \
+    init.u2.rc \
+    init.u2.usb.rc \
+    ueventd.u2.rc \
+    fstab.u2 \
+    ueventd.u2.rc
+
+# Keys
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/touch_dev.idc:system/usr/idc/touch_dev.idc \
-    $(LOCAL_PATH)/configs/touch_dev.kl:system/usr/keylayout/touch_dev.kl \
-    $(LOCAL_PATH)/configs/omap4-keypad.kl:system/usr/keylayout/omap4-keypad.kl
+    $(COMMON_FOLDER)/prebuilt/usr/idc/touch_dev.idc:system/usr/idc/touch_dev.idc \
+    $(COMMON_FOLDER)/prebuilt/usr/keylayout/touch_dev.kl:system/usr/keylayout/touch_dev.kl \
+    $(COMMON_FOLDER)/prebuilt/usr/keylayout/omap4-keypad.kl:system/usr/keylayout/omap4-keypad.kl
 
 # stagefright confs
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/media_profiles.xml:system/etc/media_profiles.xml \
-    $(LOCAL_PATH)/configs/media_codecs.xml:system/etc/media_codecs.xml \
-    $(LOCAL_PATH)/audio/audio_policy.conf:system/etc/audio_policy.conf \
+    $(COMMON_FOLDER)/prebuilt/etc/media_profiles.xml:system/etc/media_profiles.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf \
     frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:system/etc/media_codecs_google_audio.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:system/etc/media_codecs_google_telephony.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:system/etc/media_codecs_google_video.xml 
 
 # wifi nvram calibration
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
+    $(COMMON_FOLDER)/prebuilt/etc/wifi/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
 
 # RIL stuffs
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/ipc_channels.config:system/etc/ipc_channels.config
+    $(COMMON_FOLDER)/prebuilt/etc/ipc_channels.config:system/etc/ipc_channels.config
 
 # Permission files
 PRODUCT_COPY_FILES += \
@@ -60,51 +64,52 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.bluetooth.xml:system/etc/permissions/android.hardware.bluetooth.xml \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:system/etc/permissions/android.hardware.bluetooth_le.xml
 
+# Audio
+PRODUCT_PACKAGES += \
+    audio.a2dp.default \
+    audio_policy.default \
+    audio.primary.u2 \
+    libaudioutils \
+    audio.hdmi.u2 \
+    audio.usb.default \
+    audio.r_submix.default
+
 # GPS
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml \
-    $(LOCAL_PATH)/configs/SuplRootCert:system/etc/SuplRootCert \
-    $(LOCAL_PATH)/configs/lge.cer:system/etc/cert/lge.cer
+    $(COMMON_FOLDER)/prebuilt/etc/gps_brcm_conf.xml:system/etc/gps_brcm_conf.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/SuplRootCert:system/etc/SuplRootCert \
+    $(COMMON_FOLDER)/prebuilt/etc/lge.cer:system/etc/cert/lge.cer
 
 # high-density artwork where available
 PRODUCT_AAPT_CONFIG := normal hdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
+# Hardware
 PRODUCT_PACKAGES += \
     lights.omap4 \
-    libaudioutils \
-    audio.a2dp.default \
-    audio_policy.default \
-    audio.primary.u2 \
-    audio.hdmi.u2 \
-    audio.usb.default \
-    audio.r_submix.default \
-    power.u2 \
+    power.u2
 
 # Screen-off governor
 PRODUCT_PACKAGES += \
     virtuous_oc
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/virtuous_oc/virtuous_oc.conf:system/etc/virtuous_oc/virtuous_oc.conf
+    $(COMMON_FOLDER)/virtuous_oc/virtuous_oc.conf:system/etc/virtuous_oc/virtuous_oc.conf
 
 # Camera
 PRODUCT_PACKAGES += \
     Snap \
     camera.omap4  
 
-# RIL symbols
-PRODUCT_PACKAGES += \
-    liblge
-
 # OMAP4 OMX
 PRODUCT_PACKAGES += \
     libmm_osal \
     gralloc.omap4.so
 
+# Wifi MAC address
 PRODUCT_PACKAGES += \
-    wifimac \
-    libnetcmdiface
+    wifimac
 
+# Misc
 PRODUCT_PACKAGES += \
     libipcutils \
     libipc \
@@ -155,6 +160,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.call_ring.delay=0 \
     media.aac_51_output_enabled=true 
 
+# WLAN
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0 \
         wlan.chip.vendor=brcm
@@ -175,10 +181,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.build.target_country=EU \
     ro.build.target_operator=OPEN \
     ro.ksm.default=1 \
-    debug.sf.swaprect=1 \
-    ro.secure=0 \
+    debug.sf.swaprect=1 \f
     qemu.hw.mainkeys=1 \
-    debug.hwui.render_dirty_regions=false \
+    ebug.hwui.render_dirty_regions=false \
     ro.bt.bdaddr_path=/sys/devices/platform/bd_address/bdaddr_if \
     ro.hwui.disable_scissor_opt=true \
     ro.HOME_APP_ADJ=1 
@@ -187,17 +192,18 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     camera2.portability.force_api=1
 
+# ART optimizations
 ADDITIONAL_BUILD_PROPERTIES += \
 	dalvik.vm.dex2oat-flags=--no-watch-dog 
         
-#Save battery
+# Save battery
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.supplicant_scan_interval=180 \
 	pm.sleep_mode=1 \
 	windowsmgr.max_events_per_sec=60 \
 	ro.ril.disable.power.collapse=0
 	
-#Disable blackscreen issue after a call
+# Disable blackscreen issue after a call
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.lge.proximity.delay=25 \
 	mot.proximity.delay=25
@@ -209,7 +215,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # OpenglES
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.opengles.version=131072
-	
+
+# Wifi	
 PRODUCT_PACKAGES += \
 	libwpa_client \
 	hostapd \
@@ -238,12 +245,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	net.tcp.buffersize.gprs=4096,87380,256960,4096,16384,256960 \
 	net.tcp.buffersize.edge=4096,87380,256960,4096,16384,256960
 
+# Tweaks
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/fs/system/bin/fstrim:system/bin/fstrim \
-    $(LOCAL_PATH)/fs/system/framework/com.android.location.provider.jar:system/framework/com.android.location.provider.jar \
-    $(LOCAL_PATH)/fs/system/etc/permissions/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-    $(LOCAL_PATH)/fs/system/etc/permissions/com.android.location.provider.xml:system/etc/permissions/com.android.location.provider.xml \
-    $(LOCAL_PATH)/fs/system/etc/init.d/99lmk:system/etc/init.d/99lmk 
+    $(COMMON_FOLDER)/prebuilt/bin/fstrim:system/bin/fstrim \
+    $(COMMON_FOLDER)/prebuilt/framework/com.android.location.provider.jar:system/framework/com.android.location.provider.jar \
+    $(COMMON_FOLDER)/prebuilt/etc/permissions/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/permissions/com.android.location.provider.xml:system/etc/permissions/com.android.location.provider.xml \
+    $(COMMON_FOLDER)/prebuilt/etc/init.d/99lmk:system/etc/init.d/99lmk 
 
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4330/device-bcm.mk)

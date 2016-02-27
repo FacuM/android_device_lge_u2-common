@@ -8,6 +8,7 @@ TARGET_SPECIFIC_HEADER_PATH += $(COMMON_FOLDER)/include
 # inherit from the proprietary version
 -include vendor/lge/u2/BoardConfigVendor.mk
 
+# Processor
 TARGET_NO_BOOTLOADER := true
 TARGET_BOARD_OMAP_CPU := 4430
 TARGET_BOOTLOADER_BOARD_NAME := u2
@@ -24,7 +25,7 @@ BOARD_KERNEL_PAGESIZE := 2048
 
 # Recovery
 BOARD_HAS_NO_SELECT_BUTTON := true
-TARGET_RECOVERY_FSTAB := device/lge/u2-common/fstab.u2
+TARGET_RECOVERY_FSTAB := $(COMMON_FOLDER)/rootdir/fstab.u2
 RECOVERY_FSTAB_VERSION := 2
 BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file"
 TARGET_OTA_ASSERT_DEVICE := p760,p765,p768,p769,u2
@@ -37,7 +38,7 @@ else
 endif
 
 # EGL
-BOARD_EGL_CFG := device/lge/u2-common/egl.cfg
+BOARD_EGL_CFG := $(COMMON_FOLDER)/egl.cfg
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_USES_OPENGLES_FOR_SCREEN_CAPTURE := true
 
@@ -57,18 +58,16 @@ WIFI_BAND                        := 802_11_ABGN
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
-BOARD_BLUEDROID_VENDOR_CONF := device/lge/u2-common/configs/vnd_u2.txt
+BOARD_BLUEDROID_VENDOR_CONF := $(COMMON_FOLDER)/bluetooth/vnd_u2.txt
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(COMMON_FOLDER)/bluetooth
 
 # Setup custom l9 defines
 BOARD_USE_CUSTOM_LIBION := true
 TARGET_TI_HWC_HDMI_DISABLED := true
-
-BOARD_USE_CUSTOM_HWC := true
 CONFIG_NO_ALG := true
 
-## Radio fixes
-BOARD_RIL_CLASS := ../../../device/lge/u2-common/ril/
+# Radio fixes
+BOARD_RIL_CLASS := $(COMMON_FOLDER)/ril/
 
 # Enable Minikin text layout engine (will be the default soon)
 USE_MINIKIN := true
@@ -84,13 +83,11 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_HAS_NO_MISC_PARTITION := true
 
 # Vibration
-BOARD_HAS_VIBRATOR_IMPLEMENTATION := ../../device/lge/u2-common/vibrator.c
+BOARD_HAS_VIBRATOR_IMPLEMENTATION := $(COMMON_FOLDER)/vibrator.c
 
 # Camera
 USE_CAMERA_STUB := false
 COMMON_GLOBAL_CFLAGS += -DQCOM_LEGACY_UIDS
-
-BOARD_USE_TI_DOMX_LOW_SECURE_HEAP := true
 TI_CAMERAHAL_USES_LEGACY_DOMX_DCC := true
 TI_CAMERAHAL_MAX_CAMERAS_SUPPORTED := 2
 TI_CAMERAHAL_DEBUG_ENABLED := true
@@ -108,14 +105,12 @@ SGX_MODULES:
 
 TARGET_KERNEL_MODULES += SGX_MODULES
 
-BOARD_USE_TI_DUCATI_H264_PROFILE := true
-
 # Needed for RIL
 TARGET_NEEDS_BIONIC_MD5 := true
 COMMON_GLOBAL_CFLAGS += -DDISABLE_ASHMEM_TRACKING
 
 # Charger
-BOARD_CUSTOM_GRAPHICS := ../../../device/lge/u2-common/recovery-gfx.c
+BOARD_CUSTOM_GRAPHICS := $(COMMON_FOLDER)/recovery-gfx.c
 BOARD_CHARGER_ENABLE_SUSPEND := true
 
 # Override healthd HAL to use charge_counter for 1%
@@ -133,8 +128,7 @@ BOARD_SYSTEMIMAGE_JOURNAL_SIZE := 0
 AUDIO_FEATURE_ENABLED_MULTI_VOICE_SESSIONS := true
 
 # SELinux
-BOARD_SEPOLICY_DIRS += \
-    device/lge/u2-common/selinux
+BOARD_SEPOLICY_DIRS += $(COMMON_FOLDER)/sepolicy
     
 # Bootanimation
 TARGET_SCREEN_HEIGHT := 960
