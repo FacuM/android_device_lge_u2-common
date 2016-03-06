@@ -273,12 +273,6 @@ on boot
     setprop net.tcp.buffersize.gprs    4092,8760,11680,4096,8760,11680
 #LGE_CHANGE_E 20120228, soye.park@lge.com [data] Increase TCP Buffer Size
 
-#LGE_CHANGE_S 20120720, hwansuk.kang@lge.com [data] Disable IPv6 for mobile network
-    write /proc/sys/net/ipv6/conf/rmnet0/disable_ipv6 1
-    write /proc/sys/net/ipv6/conf/rment1/disable_ipv6 1
-    write /proc/sys/net/ipv6/conf/rmnet2/disable_ipv6 1
-#LGE_CHANGE_E 20120720, hwansuk.kang@lge.com [data] Disable IPv6 for mobile network
-
 service sensord /system/bin/sensord
     user system
     group compass misc input
