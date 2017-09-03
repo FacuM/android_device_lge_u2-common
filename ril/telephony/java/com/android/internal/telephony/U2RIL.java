@@ -187,7 +187,7 @@ public class U2RIL extends RIL implements CommandsInterface {
         send(rrLSL);
     }
 
-    @Override
+   // @Override
     protected void
     processUnsolicited (Parcel p) {
         Object ret;
@@ -207,7 +207,7 @@ public class U2RIL extends RIL implements CommandsInterface {
                 p.setDataPosition(dataPosition);
 
                 // Forward responses that we are not overriding to the super class
-                super.processUnsolicited(p);
+                //super.processUnsolicited(p);
                 return;
         }
         switch(response) {
@@ -256,7 +256,7 @@ public class U2RIL extends RIL implements CommandsInterface {
                 /* has bonus radio state int */
                 RadioState newState = getRadioStateFromInt(p.readInt());
                 p.setDataPosition(dataPosition);
-                super.processUnsolicited(p);
+                //super.processUnsolicited(p);
                 if (RadioState.RADIO_ON == newState) {
                     setNetworkSelectionModeAutomatic(null);
                 }
