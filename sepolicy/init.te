@@ -8,7 +8,7 @@ allow init block_device:lnk_file setattr;
 allow init kernel:system module_request;
 allow init system_data_file:file append;
 allow init system_data_file:fifo_file write;
-allow init system_file:file { execmod execute_no_trans };
+#allow init system_file:file { execmod execute_no_trans };
 allow init tmpfs:lnk_file create;
 allow init node:udp_socket node_bind;
 allow init port:udp_socket name_bind;
