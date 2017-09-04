@@ -2,9 +2,6 @@ COMMON_FOLDER := device/lge/u2-common
 
 -include hardware/ti/omap4/BoardConfigCommon.mk
 
-PRODUCT_VENDOR_KERNEL_HEADERS += $(COMMON_FOLDER)/kernel-headers
-TARGET_SPECIFIC_HEADER_PATH += $(COMMON_FOLDER)/include
-
 # inherit from the proprietary version
 -include vendor/lge/u2/BoardConfigVendor.mk
 
